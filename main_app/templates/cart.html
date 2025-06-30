@@ -1,0 +1,60 @@
+{% extends 'main_page.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Ваша корзина</h1>
+
+    {% if cart_items %}
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th>Товар</th>
+                    <th>Количество</th>
+                    <th>Цена за единицу</th>
+                    <th>Общая стоимость</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in cart_items %}
+                <tr>
+                    <td>{{ item.product.name }}</td>
+                    <td>
+                        <form method="post" action="{% url 'update_cart' item.id %}" class="form-inline">
+                            {% csrf_token %}
+                            <div class="input-group">
+                                <input type="number" name="quantity" value="{{ item.quantity }}" min="1" 
+                                       max="{{ item.product.stock_quantity }}" class="form-control" style="width: 80px;">
+                                <button type="submit" class="btn btn-sm btn-outline-primary">Обновить</button>
+                            </div>
+                        </form>
+                    </td>
+                    <td>{{ item.product.price }} руб.</td>
+                    <td>{{ item.element_cost }} руб.</td>
+                    <td>
+                        <a href="{% url 'remove_from_cart' item.id %}" class="btn btn-sm btn-outline-danger">Удалить</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot class="table-group-divider">
+                <tr>
+                    <td colspan="3" class="text-end"><strong>Итого:</strong></td>
+                    <td colspan="2"><strong>{{ total }} руб.</strong></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <div class="d-flex justify-content-between mt-4">
+        <a href="{% url 'product_list' %}" class="btn btn-outline-secondary">Продолжить покупки</a>
+    </div>
+    {% else %}
+    <div class="alert alert-info" role="alert">
+        Ваша корзина пуста.
+    </div>
+    <a href="{% url 'product_list' %}" class="btn btn-primary">Начать покупки</a>
+    {% endif %}
+</div>
+{% endblock %}
