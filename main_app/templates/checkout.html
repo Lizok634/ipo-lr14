@@ -1,0 +1,47 @@
+{% extends 'main_page.html' %}
+
+{% block content %}
+<h1>Оформление заказа</h1>
+
+<form method="post">
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="address">Адрес доставки:</label>
+        <input type="text" class="form-control" id="address" name="address" required>
+    </div>
+    <div class="form-group">
+        <label for="comments">Комментарии к заказу:</label>
+        <textarea class="form-control" id="comments" name="comments" rows="3"></textarea>
+    </div>
+    
+    <h3>Ваш заказ</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Товар</th>
+                <th>Количество</th>
+                <th>Цена</th>
+                <th>Сумма</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in shopping_cart_elements %}
+            <tr>
+                <td>{{ item.product.name }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ item.product.price }} руб.</td>
+                <td>{{ item.element_cost }} руб.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <th colspan="3">Итого:</th>
+                <th>{{ total_cost }} руб.</th>
+            </tr>
+        </tfoot>
+    </table>
+    
+    <button type="submit" class="btn btn-primary">Подтвердить заказ</button>
+</form>
+{% endblock %}

@@ -1,12 +1,19 @@
 import json
 from django.shortcuts import render, get_object_or_404, redirect
-
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from .models import Product, Category, Manufacturer, ShoppingCart, ShoppingCartElement
 from .forms import CustomUserCreationForm
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import AuthenticationForm
+
+from django.core.mail import EmailMessage
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from django.conf import settings
+import xlsxwriter
+import io
+from datetime import datetime
 
 # Create your views here.
 def main_page(request):
@@ -152,3 +159,78 @@ def user_login(request):
     else:
         form = AuthenticationForm()
     return render(request, 'login.html', {'form': form})
+
+@login_required
+def checkout(request):
+    shopping_cart = get_object_or_404(ShoppingCart, user=request.user)
+    shopping_cart_elements = shopping_cart.shopping_cart_elements.all()
+    
+    if request.method == 'POST':
+        if not shopping_cart_elements:
+            return redirect('cart_view')
+
+        output = io.BytesIO()
+        workbook = xlsxwriter.Workbook(output)
+        worksheet = workbook.add_worksheet()
+    
+        bold = workbook.add_format({'bold': True})
+        money_format = workbook.add_format({'num_format': '#,##0.00'})
+        
+        worksheet.write('A1', 'Чек заказа', bold)
+        worksheet.write('A2', 'Дата:', bold)
+        worksheet.write('B2', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+        worksheet.write('A3', 'Покупатель:', bold)
+        worksheet.write('B3', request.user.username)
+        
+        worksheet.write('A5', 'Товар', bold)
+        worksheet.write('B5', 'Количество', bold)
+        worksheet.write('C5', 'Цена', bold)
+        worksheet.write('D5', 'Сумма', bold)
+        
+        row = 6
+        for item in shopping_cart_elements:
+            worksheet.write(f'A{row}', item.product.name)
+            worksheet.write(f'B{row}', item.quantity)
+            worksheet.write(f'C{row}', float(item.product.price), money_format)
+            worksheet.write(f'D{row}', float(item.element_cost()), money_format)
+            row += 1
+        
+        worksheet.write(f'D{row}', 'Итого:', bold)
+        worksheet.write(f'E{row}', float(shopping_cart.total_cost()), money_format)
+        
+        workbook.close()
+        output.seek(0)
+        excel_data = output.getvalue()
+        
+        subject = f'Ваш чек заказа от {datetime.now().strftime("%Y-%m-%d")}'
+        message = 'Спасибо за ваш заказ! Во вложении вы найдете чек.'
+        from_email = settings.DEFAULT_FROM_EMAIL
+        recipient_list = [request.user.email]
+        
+        email = EmailMessage(
+            subject,
+            message,
+            from_email,
+            recipient_list,
+        )
+        email.attach('order_receipt.xlsx', excel_data, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        
+        html_message = render_to_string('order_confirmation.html', {
+            'user': request.user,
+            'shopping_cart': shopping_cart,
+            'shopping_cart_elements': shopping_cart_elements,
+            'total_cost': shopping_cart.total_cost(),
+        })
+        email.content_subtype = "html"
+        email.body = html_message
+        
+        email.send(fail_silently=False)
+        
+        shopping_cart_elements.delete()
+        
+        return render(request, 'checkout_success.html')
+    
+    return render(request, 'checkout.html', {
+        'shopping_cart_elements': shopping_cart_elements,
+        'total_cost': shopping_cart.total_cost(),
+    })

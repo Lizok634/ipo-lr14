@@ -1,0 +1,10 @@
+{% extends 'main_page.html' %}
+
+{% block content %}
+<div class="alert alert-success">
+    <h1>Заказ успешно оформлен!</h1>
+    <p>Чек отправлен на вашу электронную почту {{ user.email }}.</p>
+    <p>Спасибо за покупку!</p>
+    <a href="{% url 'product_list' %}" class="btn btn-primary">Вернуться в каталог</a>
+</div>
+{% endblock %}

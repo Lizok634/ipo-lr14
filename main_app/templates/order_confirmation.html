@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Подтверждение заказа</title>
+</head>
+<body>
+    <h1>Спасибо за ваш заказ, {{ user.username }}!</h1>
+    <p>Номер заказа: #{{ shopping_cart.id }}</p>
+    <p>Дата заказа: {{ shopping_cart.creation_date|date:"Y-m-d H:i" }}</p>
+    
+    <h2>Детали заказа:</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Товар</th>
+                <th>Количество</th>
+                <th>Цена</th>
+                <th>Сумма</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in shopping_cart_elements %}
+            <tr>
+                <td>{{ item.product.name }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ item.product.price }} руб.</td>
+                <td>{{ item.element_cost }} руб.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <th colspan="3">Итого:</th>
+                <th>{{ total_cost }} руб.</th>
+            </tr>
+        </tfoot>
+    </table>
+    
+    <p>Чек прикреплен к этому письму в формате Excel.</p>
+    <p>С уважением,<br>Команда магазина канцелярских товаров</p>
+</body>
+</html>
