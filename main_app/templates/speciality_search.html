@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head lang="ru">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speciality search</title>
+</head>
+<body>
+
+    {% if speciality %}
+    <ul>
+        {% for spec in speciality %}
+            <p><span>Название:</span> {{ spec.title }}</p>
+            <p><span>Код специальности:</span> {{ spec.code }}</p>
+            <p><span>PK:</span> {{ spec.pk }}</p>
+            <p><span>Тип обучения:</span> {{ spec.c_type }}</p>
+        {% endfor %}
+    </ul>
+    {% else %}
+        <p>Специальность не найдена.</p> 
+    {% endif %}
+    <a href="http://127.0.0.1:8000/spec">Назад к списку специальностей.</a>
+
+</body>
+</html>

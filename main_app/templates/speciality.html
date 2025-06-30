@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head lang="ru">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speciality</title>
+    
+</head>
+<body>
+
+    <h1>Список специальностей</h1>
+    <form method="GET" action ="{% url 'speciality_search' %}"> 
+        <input type="text" name="code" placeholder="Поиск по коду специальности:">
+        <button name="Найти" type ="submit">Найти</button> 
+    </form>
+
+    <ul>   
+        {% if specialties %}
+            {% for specialty in specialties %}
+                <br>
+                <p><span>Название специальности:</span> {{ specialty.title }}</p>
+                <p><span>Код специальности:</span> {{ specialty.code }}</p>
+                <p><span>Тип обучения:</span> {{ specialty.c_type }}</p>
+                <p><span>PK:</span> {{ specialty.pk }}</p>
+                <br>
+            {% endfor %}
+        {% endif %}
+    </ul>
+
+</body>
+</html>
