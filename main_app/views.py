@@ -6,14 +6,21 @@ from .models import Product, Category, Manufacturer, ShoppingCart, ShoppingCartE
 from .forms import CustomUserCreationForm
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import AuthenticationForm
-
 from django.core.mail import EmailMessage
-from django.http import HttpResponse
 from django.template.loader import render_to_string
 from django.conf import settings
 import xlsxwriter
 import io
 from datetime import datetime
+from rest_framework import viewsets
+from .serializers import (
+    ProductSerializer,
+    CategorySerializer,
+    ManufacturerSerializer,
+    ShoppingCartSerializer,
+    ShoppingCartElementSerializer
+)
+from rest_framework.permissions import IsAuthenticated
 
 # Create your views here.
 def main_page(request):
@@ -234,3 +241,28 @@ def checkout(request):
         'shopping_cart_elements': shopping_cart_elements,
         'total_cost': shopping_cart.total_cost(),
     })
+
+class ProductViewSet(viewsets.ModelViewSet):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    permission_classes = [IsAuthenticated]
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = [IsAuthenticated]
+
+class ManufacturerViewSet(viewsets.ModelViewSet):
+    queryset = Manufacturer.objects.all()
+    serializer_class = ManufacturerSerializer
+    permission_classes = [IsAuthenticated]
+
+class ShoppingCartViewSet(viewsets.ModelViewSet):
+    queryset = ShoppingCart.objects.all()
+    serializer_class = ShoppingCartSerializer
+    permission_classes = [IsAuthenticated]
+
+class ShoppingCartElementViewSet(viewsets.ModelViewSet):
+    queryset = ShoppingCartElement.objects.all()
+    serializer_class = ShoppingCartElementSerializer
+    permission_classes = [IsAuthenticated]
